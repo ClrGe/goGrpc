@@ -24,4 +24,5 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/tools v0.4.0 // indirect
+	gonum.org/v1/gonum v0.9.1 // indirect
 )
