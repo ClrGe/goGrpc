@@ -4,8 +4,10 @@ go 1.19
 
 require (
 	github.com/go-gota/gota v0.12.0
+	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0
 	github.com/labstack/echo v3.3.10+incompatible
+	google.golang.org/grpc v1.51.0
 )
 
 require (
@@ -17,7 +19,7 @@ require (
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gocarina/gocsv v0.0.0-20221105105431-c8ef78125b99 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
@@ -33,6 +35,5 @@ require (
 	golang.org/x/tools v0.4.0 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
 	google.golang.org/genproto v0.0.0-20230106154932-a12b697841d9 // indirect
-	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
