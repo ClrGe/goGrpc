@@ -7,7 +7,8 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0
 	github.com/labstack/echo v3.3.10+incompatible
-	google.golang.org/grpc v1.51.0
+	google.golang.org/grpc v1.52.0
+	google.golang.org/grpc/examples v0.0.0-20230113182548-78ddc05d9b33
 )
 
 require (
@@ -34,6 +35,6 @@ require (
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/tools v0.4.0 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
-	google.golang.org/genproto v0.0.0-20230106154932-a12b697841d9 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
