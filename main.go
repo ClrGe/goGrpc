@@ -37,7 +37,7 @@ func LoadConfig(path string) (config Config, err error) {
 
 type Data struct {
 	UicCode string `csv:"code_uic"`
-	ZipCode string `csv:"cp"`
+	Zipcode string `csv:"cp"`
 	A2015   int32  `csv:"a2015"`
 	A2016   int32  `csv:"a2016"`
 	A2017   int32  `csv:"a2017"`
@@ -49,20 +49,6 @@ type Data struct {
 
 type DataRepo interface {
 	DataList(ctx context.Context, offset int64, limit int64) ([]*Data, error)
-}
-
-//type FrequentationServer struct {
-//	pb.UnimplementedFrequentationServer
-//}
-
-func NewRPCServer(repository DataRepo) *grpc.Server {
-	srv := grpcServer{
-		DataRepo: repository,
-	}
-
-	gsrv := grpc.NewServer()
-	pb.RegisterFrequentationServer(gsrv, &srv)
-	return gsrv
 }
 
 func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.ListResponse, error) {
@@ -84,11 +70,12 @@ func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.Lis
 	for _, station := range stations {
 		b := &pb.Data{
 			UicCode: station.UicCode,
+			Zipcode: station.Zipcode,
 			A2015:   station.A2015,
 			A2016:   station.A2016,
 			A2017:   station.A2017,
 			A2018:   station.A2018,
-			A2019:   station.A2019,
+			A2019:   station.A2018,
 			A2020:   station.A2020,
 			A2021:   station.A2021,
 		}
@@ -97,65 +84,6 @@ func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.Lis
 	response.Data = rslt
 	return response, nil
 }
-
-//func (s *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*pb.FrequentationResponse, error) {
-//
-//	in, err := os.Open("data/frequentation-gares.csv")
-//	if err != nil {
-//		panic(err)
-//	}
-//	defer in.Close()
-//
-//	stations := []*Station{}
-//
-//	if err := gocsv.UnmarshalFile(in, &stations); err != nil {
-//		panic(err)
-//	}
-//
-//	//frequentation := pb.FrequentationResponse_Value{}
-//	list := pb.FrequentationResponse{}
-//
-//	for _, station := range stations {
-//		frequentation := pb.FrequentationResponse_Value{
-//			UicCode: station.UicCode,
-//			A2015:   station.A2015,
-//			A2016:   station.A2016,
-//			A2017:   station.A2017,
-//			A2018:   station.A2018,
-//			A2019:   station.A2019,
-//			A2020:   station.A2020,
-//			A2021:   station.A2021}
-//		var list = pb.FrequentationResponse{Value: }
-//		fmt.Print(frequentation)
-//		fmt.Print(station)
-//
-//		return &list, nil
-//	}
-//
-//	return &list, nil
-//}
-
-//func (srv *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*pb.FrequentationResponse, error) {
-//	bufferSize := 64 * 1024 //64KiB, tweak this as desired
-//	file, _ := os.Open("./data/output.json")
-//	resp := &pb.FrequentationResponse{}
-//	defer file.Close()
-//	buff := make([]byte, bufferSize)
-//	for {
-//		bytesRead, err := file.Read(buff)
-//		if err != nil {
-//			if err != io.EOF {
-//				fmt.Println(err)
-//			}
-//			break
-//		}
-//		resp := &pb.FrequentationResponse{
-//			FileChunk: buff[:bytesRead],
-//		}
-//		return resp, nil
-//	}
-//	return resp, nil
-//}
 
 func main() {
 
