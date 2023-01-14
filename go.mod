@@ -19,7 +19,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
-	github.com/gocarina/gocsv v0.0.0-20221105105431-c8ef78125b99 // indirect
+	github.com/gocarina/gocsv v0.0.0-20221216233619-1fea7ae8d380 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
