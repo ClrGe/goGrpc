@@ -3,14 +3,18 @@ package main
 import (
 	"context"
 	pb "dataAnalyzerFile/frequentationPB"
-	"fmt"
+	"github.com/gocarina/gocsv"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"io"
 	"log"
 	"net"
 	"os"
 )
+
+type grpcServer struct {
+	DataRepo DataRepo
+	pb.UnimplementedFrequentationServer
+}
 
 type Config struct {
 	AppEnv        string `mapstructure:"APP_ENV"`
@@ -31,7 +35,7 @@ func LoadConfig(path string) (config Config, err error) {
 	return
 }
 
-type Station struct {
+type Data struct {
 	UicCode string `csv:"code_uic"`
 	ZipCode string `csv:"cp"`
 	A2015   int32  `csv:"a2015"`
@@ -43,11 +47,58 @@ type Station struct {
 	A2021   int32  `csv:"a2021"`
 }
 
-type FrequentationServer struct {
-	pb.UnimplementedFrequentationServer
+type DataRepo interface {
+	DataList(ctx context.Context, offset int64, limit int64) ([]*Data, error)
 }
 
-//func (s *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*[]*pb.FrequentationResponse, error) {
+//type FrequentationServer struct {
+//	pb.UnimplementedFrequentationServer
+//}
+
+func NewRPCServer(repository DataRepo) *grpc.Server {
+	srv := grpcServer{
+		DataRepo: repository,
+	}
+
+	gsrv := grpc.NewServer()
+	pb.RegisterFrequentationServer(gsrv, &srv)
+	return gsrv
+}
+
+func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.ListResponse, error) {
+
+	stations := []*Data{}
+	response := &pb.ListResponse{}
+	rslt := []*pb.Data{}
+
+	in, err := os.Open("data/frequentation-gares.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer in.Close()
+
+	if err := gocsv.UnmarshalFile(in, &stations); err != nil {
+		panic(err)
+	}
+
+	for _, station := range stations {
+		b := &pb.Data{
+			UicCode: station.UicCode,
+			A2015:   station.A2015,
+			A2016:   station.A2016,
+			A2017:   station.A2017,
+			A2018:   station.A2018,
+			A2019:   station.A2019,
+			A2020:   station.A2020,
+			A2021:   station.A2021,
+		}
+		rslt = append(rslt, b)
+	}
+	response.Data = rslt
+	return response, nil
+}
+
+//func (s *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*pb.FrequentationResponse, error) {
 //
 //	in, err := os.Open("data/frequentation-gares.csv")
 //	if err != nil {
@@ -56,46 +107,55 @@ type FrequentationServer struct {
 //	defer in.Close()
 //
 //	stations := []*Station{}
+//
 //	if err := gocsv.UnmarshalFile(in, &stations); err != nil {
 //		panic(err)
 //	}
+//
+//	//frequentation := pb.FrequentationResponse_Value{}
+//	list := pb.FrequentationResponse{}
+//
 //	for _, station := range stations {
-//		frequentation := pb.FrequentationList.GetValue(pb.FrequentationResponse{
+//		frequentation := pb.FrequentationResponse_Value{
 //			UicCode: station.UicCode,
-//			Zipcode: station.ZipCode,
 //			A2015:   station.A2015,
 //			A2016:   station.A2016,
 //			A2017:   station.A2017,
 //			A2018:   station.A2018,
 //			A2019:   station.A2019,
 //			A2020:   station.A2020,
-//			A2021:   station.A2021})
-//		return &frequentation, nil
+//			A2021:   station.A2021}
+//		var list = pb.FrequentationResponse{Value: }
+//		fmt.Print(frequentation)
+//		fmt.Print(station)
+//
+//		return &list, nil
 //	}
-//	return 200, nil
+//
+//	return &list, nil
 //}
 
-func (srv *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*pb.FrequentationResponse, error) {
-	bufferSize := 64 * 1024 //64KiB, tweak this as desired
-	file, _ := os.Open("./data/output.json")
-	resp := &pb.FrequentationResponse{}
-	defer file.Close()
-	buff := make([]byte, bufferSize)
-	for {
-		bytesRead, err := file.Read(buff)
-		if err != nil {
-			if err != io.EOF {
-				fmt.Println(err)
-			}
-			break
-		}
-		resp := &pb.FrequentationResponse{
-			FileChunk: buff[:bytesRead],
-		}
-		return resp, nil
-	}
-	return resp, nil
-}
+//func (srv *FrequentationServer) ReadStations(context.Context, *pb.FrequentationRequest) (*pb.FrequentationResponse, error) {
+//	bufferSize := 64 * 1024 //64KiB, tweak this as desired
+//	file, _ := os.Open("./data/output.json")
+//	resp := &pb.FrequentationResponse{}
+//	defer file.Close()
+//	buff := make([]byte, bufferSize)
+//	for {
+//		bytesRead, err := file.Read(buff)
+//		if err != nil {
+//			if err != io.EOF {
+//				fmt.Println(err)
+//			}
+//			break
+//		}
+//		resp := &pb.FrequentationResponse{
+//			FileChunk: buff[:bytesRead],
+//		}
+//		return resp, nil
+//	}
+//	return resp, nil
+//}
 
 func main() {
 
@@ -110,7 +170,7 @@ func main() {
 
 	s := grpc.NewServer()
 
-	pb.RegisterFrequentationServer(s, &FrequentationServer{})
+	pb.RegisterFrequentationServer(s, &grpcServer{})
 
 	log.Printf("server listening at %v", lis.Addr())
 
