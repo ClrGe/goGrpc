@@ -17,7 +17,6 @@ type grpcServer struct {
 }
 
 type Config struct {
-	AppEnv        string `mapstructure:"APP_ENV"`
 	ServerAddress string `mapstructure:"URI"`
 }
 
@@ -81,6 +80,7 @@ func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.Lis
 		}
 		rslt = append(rslt, b)
 	}
+
 	response.Data = rslt
 	return response, nil
 }

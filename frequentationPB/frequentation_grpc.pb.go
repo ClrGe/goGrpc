@@ -22,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FrequentationClient interface {
-	ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationResponse, error)
 	DataList(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 }
 
@@ -32,15 +31,6 @@ type frequentationClient struct {
 
 func NewFrequentationClient(cc grpc.ClientConnInterface) FrequentationClient {
 	return &frequentationClient{cc}
-}
-
-func (c *frequentationClient) ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationResponse, error) {
-	out := new(FrequentationResponse)
-	err := c.cc.Invoke(ctx, "/frequentation.Frequentation/ReadStations", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *frequentationClient) DataList(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
@@ -56,7 +46,6 @@ func (c *frequentationClient) DataList(ctx context.Context, in *ListRequest, opt
 // All implementations must embed UnimplementedFrequentationServer
 // for forward compatibility
 type FrequentationServer interface {
-	ReadStations(context.Context, *FrequentationRequest) (*FrequentationResponse, error)
 	DataList(context.Context, *ListRequest) (*ListResponse, error)
 	mustEmbedUnimplementedFrequentationServer()
 }
@@ -65,9 +54,6 @@ type FrequentationServer interface {
 type UnimplementedFrequentationServer struct {
 }
 
-func (UnimplementedFrequentationServer) ReadStations(context.Context, *FrequentationRequest) (*FrequentationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadStations not implemented")
-}
 func (UnimplementedFrequentationServer) DataList(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DataList not implemented")
 }
@@ -82,24 +68,6 @@ type UnsafeFrequentationServer interface {
 
 func RegisterFrequentationServer(s grpc.ServiceRegistrar, srv FrequentationServer) {
 	s.RegisterService(&Frequentation_ServiceDesc, srv)
-}
-
-func _Frequentation_ReadStations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FrequentationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FrequentationServer).ReadStations(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/frequentation.Frequentation/ReadStations",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FrequentationServer).ReadStations(ctx, req.(*FrequentationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Frequentation_DataList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -127,10 +95,6 @@ var Frequentation_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "frequentation.Frequentation",
 	HandlerType: (*FrequentationServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "ReadStations",
-			Handler:    _Frequentation_ReadStations_Handler,
-		},
 		{
 			MethodName: "DataList",
 			Handler:    _Frequentation_DataList_Handler,
