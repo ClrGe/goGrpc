@@ -4,12 +4,32 @@ import (
 	"context"
 	pb "dataAnalyzerFile/frequentationPB"
 	"fmt"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"io"
 	"log"
 	"net"
 	"os"
 )
+
+type Config struct {
+	AppEnv        string `mapstructure:"APP_ENV"`
+	ServerAddress string `mapstructure:"URI"`
+}
+
+func LoadConfig(path string) (config Config, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("app")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&config)
+	return
+}
 
 type Station struct {
 	UicCode string `csv:"code_uic"`
@@ -79,7 +99,10 @@ func (srv *FrequentationServer) ReadStations(context.Context, *pb.FrequentationR
 
 func main() {
 
-	lis, err := net.Listen("tcp", "localhost:5000")
+	// load app.env file data to struct
+	config, err := LoadConfig(".")
+
+	lis, err := net.Listen("tcp", config.ServerAddress)
 
 	if err != nil {
 		log.Fatalf("failed connection: %v", err)
