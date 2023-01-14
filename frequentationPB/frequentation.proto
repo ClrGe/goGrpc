@@ -5,23 +5,24 @@ package frequentation;
 option go_package = "./frequentationPB";
 
 service Frequentation {
-    rpc ReadStations(FrequentationRequest) returns (FrequentationList);
+    rpc ReadStations(FrequentationRequest) returns (FrequentationResponse);
 }
 
 message FrequentationRequest {
-    string zipcode = 1;
+        string fileName = 1;
 }
 
 message FrequentationResponse {
-        string uic_code = 1;
-        string zipcode = 2;
-        int32 a2015 = 3;
-        int32 a2016 = 4;
-        int32 a2017 = 5;
-        int32 a2018 = 6;
-        int32 a2019 = 7;
-        int32 a2020 = 8;
-        int32 a2021 = 9;
+//        string uic_code = 1;
+//        string zipcode = 2;
+//        int32 a2015 = 3;
+//        int32 a2016 = 4;
+//        int32 a2017 = 5;
+//        int32 a2018 = 6;
+//        int32 a2019 = 7;
+//        int32 a2020 = 8;
+//        int32 a2021 = 9;
+        bytes fileChunk = 1;
 }
 
 message FrequentationList {

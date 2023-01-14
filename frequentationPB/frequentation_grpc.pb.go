@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FrequentationClient interface {
-	ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationList, error)
+	ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationResponse, error)
 }
 
 type frequentationClient struct {
@@ -33,8 +33,8 @@ func NewFrequentationClient(cc grpc.ClientConnInterface) FrequentationClient {
 	return &frequentationClient{cc}
 }
 
-func (c *frequentationClient) ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationList, error) {
-	out := new(FrequentationList)
+func (c *frequentationClient) ReadStations(ctx context.Context, in *FrequentationRequest, opts ...grpc.CallOption) (*FrequentationResponse, error) {
+	out := new(FrequentationResponse)
 	err := c.cc.Invoke(ctx, "/frequentation.Frequentation/ReadStations", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (c *frequentationClient) ReadStations(ctx context.Context, in *Frequentatio
 // All implementations must embed UnimplementedFrequentationServer
 // for forward compatibility
 type FrequentationServer interface {
-	ReadStations(context.Context, *FrequentationRequest) (*FrequentationList, error)
+	ReadStations(context.Context, *FrequentationRequest) (*FrequentationResponse, error)
 	mustEmbedUnimplementedFrequentationServer()
 }
 
@@ -54,7 +54,7 @@ type FrequentationServer interface {
 type UnimplementedFrequentationServer struct {
 }
 
-func (UnimplementedFrequentationServer) ReadStations(context.Context, *FrequentationRequest) (*FrequentationList, error) {
+func (UnimplementedFrequentationServer) ReadStations(context.Context, *FrequentationRequest) (*FrequentationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadStations not implemented")
 }
 func (UnimplementedFrequentationServer) mustEmbedUnimplementedFrequentationServer() {}
