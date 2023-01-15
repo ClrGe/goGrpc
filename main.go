@@ -1,25 +1,30 @@
+// This program creates a gRPC server that serves train station data by reading data from a static file
 package main
 
 import (
 	"context"
 	pb "dataAnalyzerFile/frequentationPB"
-	"github.com/gocarina/gocsv"
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
+
+	"github.com/gocarina/gocsv"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
+// grpcServer struct  implements the gRPC server and the DataRepo interface
 type grpcServer struct {
 	DataRepo DataRepo
 	pb.UnimplementedFrequentationServer
 }
 
+// Config struct holds the URI for the server
 type Config struct {
 	ServerAddress string `mapstructure:"URI"`
 }
 
+// LoadConfig loads the env file data to a struct
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
@@ -34,6 +39,7 @@ func LoadConfig(path string) (config Config, err error) {
 	return
 }
 
+// Data struct holds the data from the csv file
 type Data struct {
 	UicCode string `csv:"code_uic"`
 	Zipcode string `csv:"cp"`
@@ -51,21 +57,21 @@ type DataRepo interface {
 }
 
 func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.ListResponse, error) {
-
+	// Initialize variables to store stations data and response
 	stations := []*Data{}
 	response := &pb.ListResponse{}
 	rslt := []*pb.Data{}
-
+	// Open the CSV file containing the stations data
 	in, err := os.Open("data/frequentation-gares.csv")
 	if err != nil {
 		panic(err)
 	}
 	defer in.Close()
-
+	// Unmarshal the CSV data into the stations variable
 	if err := gocsv.UnmarshalFile(in, &stations); err != nil {
 		panic(err)
 	}
-
+	// Iterate through each station in the stations variable and populate a new Data object
 	for _, station := range stations {
 		b := &pb.Data{
 			UicCode: station.UicCode,
@@ -86,20 +92,16 @@ func (s *grpcServer) DataList(ctx context.Context, req *pb.ListRequest) (*pb.Lis
 }
 
 func main() {
-
 	// load app.env file data to struct
 	config, err := LoadConfig(".")
 
 	lis, err := net.Listen("tcp", config.ServerAddress)
-
 	if err != nil {
 		log.Fatalf("failed connection: %v", err)
 	}
 
 	s := grpc.NewServer()
-
 	pb.RegisterFrequentationServer(s, &grpcServer{})
-
 	log.Printf("server listening at %v", lis.Addr())
 
 	if err := s.Serve(lis); err != nil {
